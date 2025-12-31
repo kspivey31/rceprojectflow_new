@@ -16,12 +16,14 @@ app.use(cors());
 
 // PostgreSQL connection setup
 // Impact: This connects your backend to your AWS RDS PostgreSQL database
+// PostgreSQL connection setup using environment variables
+// Impact: This connects your backend to your AWS RDS PostgreSQL database using Railway environment variables
 const pool = new pg.Pool({
-    user: 'rce301', // TODO: Replace with your DB user
-    host: 'rce-database.cz4im8ikc9n0.us-east-2.rds.amazonaws.com', // TODO: Replace with your DB host (RDS endpoint)
-    database: 'rceprojectflow_new', // TODO: Replace with your DB name
-    password: 'RCE1991#', // TODO: Replace with your DB password
-    port: 5432, // Default PostgreSQL port
+    user: process.env.PGUSER,      // Set in Railway as PGUSER
+    host: process.env.PGHOST,      // Set in Railway as PGHOST
+    database: process.env.PGDATABASE, // Set in Railway as PGDATABASE
+    password: process.env.PGPASSWORD, // Set in Railway as PGPASSWORD
+    port: process.env.PGPORT,      // Set in Railway as PGPORT (usually 5432)
 });
 
 
