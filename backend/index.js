@@ -1,3 +1,18 @@
+// POST create a new project
+// Impact: Adds a new project to the database
+app.post('/api/projects', async (req, res) => {
+    const { projectNumber, title, department, client, phases, pricing, tasks, status } = req.body;
+    try {
+        const result = await pool.query(
+            'INSERT INTO projects (project_number, title, department, client, phases, pricing, tasks, status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *',
+            [projectNumber, title, department, client, JSON.stringify(phases), JSON.stringify(pricing), JSON.stringify(tasks), status]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (err) {
+        console.error('Error creating project:', err);
+        res.status(500).json({ error: 'Failed to create project' });
+    }
+});
 // Entry point for the backend Express server
 // This file will set up the Express app and connect to PostgreSQL
 // Impact: This is the main file that starts your backend server
