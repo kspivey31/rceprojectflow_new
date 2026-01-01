@@ -9,12 +9,6 @@ const qaOptions = [
     'QA Completed',
 ];
 
-const qaOptions = [
-    'Submitted QA1',
-    'Submitted QA2',
-    'QA Completed',
-];
-
 function EditProposalModal({ proposal, onSave, onClose }) {
     const [form, setForm] = useState({ ...proposal });
     const handleChange = e => {
