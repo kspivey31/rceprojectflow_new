@@ -16,7 +16,6 @@ app.use(cors());
 
 // PostgreSQL connection setup
 // Impact: This connects your backend to your AWS RDS PostgreSQL database
-// PostgreSQL connection setup using environment variables
 // Impact: This connects your backend to your AWS RDS PostgreSQL database using Railway environment variables
 const pool = new pg.Pool({
     user: process.env.PGUSER,      // Set in Railway as PGUSER
@@ -40,6 +39,22 @@ app.get('/api/proposals', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch proposals' });
     }
 });
+
+// Health check route
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', message: 'Backend server is healthy' });
+});
+
+// Check DB connection at startup
+pool.connect()
+    .then(client => {
+        console.log('Connected to PostgreSQL database');
+        client.release();
+    })
+    .catch(err => {
+        console.error('Failed to connect to PostgreSQL database:', err);
+        process.exit(1);
+    });
 
 // POST create a new proposal
 // Impact: Adds a new proposal to the database
