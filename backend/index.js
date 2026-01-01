@@ -1,5 +1,38 @@
-// POST create a new project
-// Impact: Adds a new project to the database
+
+// --- Imports ---
+import express from 'express';
+import pg from 'pg';
+import cors from 'cors';
+
+// --- App Initialization ---
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// --- Middleware ---
+app.use(express.json());
+app.use(cors());
+
+// --- PostgreSQL Connection ---
+const pool = new pg.Pool({
+    user: process.env.PGUSER,
+    host: process.env.PGHOST,
+    database: process.env.PGDATABASE,
+    password: process.env.PGPASSWORD,
+    port: process.env.PGPORT,
+});
+
+// --- API Endpoints ---
+// Projects
+app.get('/api/projects', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM projects ORDER BY id DESC');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching projects:', err);
+        res.status(500).json({ error: 'Failed to fetch projects' });
+    }
+});
+
 app.post('/api/projects', async (req, res) => {
     const { projectNumber, title, department, client, phases, pricing, tasks, status } = req.body;
     try {
@@ -13,51 +46,34 @@ app.post('/api/projects', async (req, res) => {
         res.status(500).json({ error: 'Failed to create project' });
     }
 });
-// Entry point for the backend Express server
-// This file will set up the Express app and connect to PostgreSQL
-// Impact: This is the main file that starts your backend server
 
-import express from 'express';
-import pg from 'pg';
-import cors from 'cors';
-
-const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Middleware to parse JSON bodies
-app.use(express.json());
-// Enable CORS for frontend-backend communication (temporarily allow all origins for debugging)
-app.use(cors());
-
-// PostgreSQL connection setup
-// Impact: This connects your backend to your AWS RDS PostgreSQL database
-// Impact: This connects your backend to your AWS RDS PostgreSQL database using Railway environment variables
-const pool = new pg.Pool({
-    user: process.env.PGUSER,      // Set in Railway as PGUSER
-    host: process.env.PGHOST,      // Set in Railway as PGHOST
-    database: process.env.PGDATABASE, // Set in Railway as PGDATABASE
-    password: process.env.PGPASSWORD, // Set in Railway as PGPASSWORD
-    port: process.env.PGPORT,      // Set in Railway as PGPORT (usually 5432)
-});
-
-// --- Projects API Endpoint ---
-// GET all projects
-// Impact: Returns a list of all projects from the database
-app.get('/api/projects', async (req, res) => {
+app.put('/api/projects/:id', async (req, res) => {
+    const { id } = req.params;
+    const { projectNumber, title, department, client, phases, pricing, tasks, status } = req.body;
     try {
-        const result = await pool.query('SELECT * FROM projects ORDER BY id DESC');
-        res.json(result.rows);
+        const result = await pool.query(
+            'UPDATE projects SET project_number = $1, title = $2, department = $3, client = $4, phases = $5, pricing = $6, tasks = $7, status = $8 WHERE id = $9 RETURNING *',
+            [projectNumber, title, department, client, JSON.stringify(phases), JSON.stringify(pricing), JSON.stringify(tasks), status, id]
+        );
+        res.json(result.rows[0]);
     } catch (err) {
-        console.error('Error fetching projects:', err);
-        res.status(500).json({ error: 'Failed to fetch projects' });
+        console.error('Error updating project:', err);
+        res.status(500).json({ error: 'Failed to update project' });
     }
 });
 
+app.delete('/api/projects/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM projects WHERE id = $1', [id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error deleting project:', err);
+        res.status(500).json({ error: 'Failed to delete project' });
+    }
+});
 
-// --- Proposals API Endpoints ---
-
-// GET all proposals
-// Impact: Returns a list of all proposals from the database
+// Proposals
 app.get('/api/proposals', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM proposals ORDER BY id DESC');
@@ -68,24 +84,6 @@ app.get('/api/proposals', async (req, res) => {
     }
 });
 
-// Health check route
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', message: 'Backend server is healthy' });
-});
-
-// Check DB connection at startup
-pool.connect()
-    .then(client => {
-        console.log('Connected to PostgreSQL database');
-        client.release();
-    })
-    .catch(err => {
-        console.error('Failed to connect to PostgreSQL database:', err);
-        process.exit(1);
-    });
-
-// POST create a new proposal
-// Impact: Adds a new proposal to the database
 app.post('/api/proposals', async (req, res) => {
     const { title, department, client, createdBy, qaStatus, phases, pricing, tasks, comments } = req.body;
     try {
@@ -100,22 +98,41 @@ app.post('/api/proposals', async (req, res) => {
     }
 });
 
-// PATCH update QA status for a proposal
-// Impact: Updates the QA status and triggers project creation if QA Completed
+app.put('/api/proposals/:id', async (req, res) => {
+    const { id } = req.params;
+    const { title, department, client, createdBy, qaStatus, phases, pricing, tasks, comments } = req.body;
+    try {
+        const result = await pool.query(
+            'UPDATE proposals SET title = $1, department = $2, client = $3, created_by = $4, qa_status = $5, phases = $6, pricing = $7, tasks = $8, comments = $9 WHERE id = $10 RETURNING *',
+            [title, department, client, createdBy, qaStatus, JSON.stringify(phases), JSON.stringify(pricing), JSON.stringify(tasks), comments, id]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error updating proposal:', err);
+        res.status(500).json({ error: 'Failed to update proposal' });
+    }
+});
+
+app.delete('/api/proposals/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM proposals WHERE id = $1', [id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Error deleting proposal:', err);
+        res.status(500).json({ error: 'Failed to delete proposal' });
+    }
+});
+
 app.patch('/api/proposals/:id/qa', async (req, res) => {
     const { id } = req.params;
     const { qaStatus } = req.body;
     try {
-        // Update QA status
         await pool.query('UPDATE proposals SET qa_status = $1 WHERE id = $2', [qaStatus, id]);
-
-        // If QA Completed, create a new project from this proposal (simplified logic)
         if (qaStatus === 'QA Completed') {
-            // Fetch proposal data
             const propRes = await pool.query('SELECT * FROM proposals WHERE id = $1', [id]);
             const proposal = propRes.rows[0];
             if (proposal) {
-                // Insert new project using proposal data
                 await pool.query(
                     'INSERT INTO projects (title, department, client, phases, pricing, tasks, status) VALUES ($1,$2,$3,$4,$5,$6,$7)',
                     [proposal.title, proposal.department, proposal.client, proposal.phases, proposal.pricing, proposal.tasks, 'Active']
@@ -129,14 +146,28 @@ app.patch('/api/proposals/:id/qa', async (req, res) => {
     }
 });
 
-// --- End Proposals API ---
+// Health check
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', message: 'Backend server is healthy' });
+});
 
 // Test route
 app.get('/', (req, res) => {
     res.send('Backend server is running!');
 });
 
-// Start the server
+// DB connection check
+pool.connect()
+    .then(client => {
+        console.log('Connected to PostgreSQL database');
+        client.release();
+    })
+    .catch(err => {
+        console.error('Failed to connect to PostgreSQL database:', err);
+        process.exit(1);
+    });
+
+// Start server
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
