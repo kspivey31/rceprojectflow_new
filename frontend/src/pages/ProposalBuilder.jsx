@@ -1,6 +1,7 @@
 // ProposalBuilder.jsx: Form to create a new proposal with phases, tasks, pricing, and comments
 // Impact: Implements the Proposal Builder page for user input and proposal creation
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const initialPhase = { name: '', pricing: '', tasks: [''] };
 
@@ -39,10 +40,24 @@ function ProposalBuilder() {
     const removeTask = (phaseIdx, taskIdx) => setPhases(phases.map((phase, i) => i === phaseIdx ? { ...phase, tasks: phase.tasks.filter((_, j) => j !== taskIdx) } : phase));
 
     // Handle form submission
-    const handleSubmit = (e) => {
+    const apiUrl = import.meta.env.VITE_API_URL || '';
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // TODO: Send proposal data to backend API
-        alert('Proposal saved! (API call placeholder)');
+        const proposal = {
+            title: projectName,
+            department,
+            client,
+            phases,
+            comments,
+            createdBy: 'You',
+            qaStatus: 'Submitted QA1',
+        };
+        try {
+            await axios.post(`${apiUrl}/api/proposals`, proposal);
+            alert('Proposal saved!');
+        } catch {
+            alert('Failed to save proposal');
+        }
     };
 
     return (

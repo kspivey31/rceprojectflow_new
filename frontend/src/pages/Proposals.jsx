@@ -1,25 +1,12 @@
 // Proposals.jsx: Lists all proposals in card format with QA workflow
 // Impact: Implements the Proposals page with card view, QA status dropdown, and create proposal button
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-// Dummy data for proposals (replace with API data later)
-const initialProposals = [
-    {
-        id: 1,
-        title: 'Bridge Design for River X',
-        department: 'Structural',
-        client: 'City of Springfield',
-        createdBy: 'Alice',
-        qaStatus: 'Submitted QA1',
-    },
-    {
-        id: 2,
-        title: 'Highway Expansion Phase 2',
-        department: 'Transportation',
-        client: 'State DOT',
-        createdBy: 'Bob',
-        qaStatus: 'Submitted QA2',
-    },
+const qaOptions = [
+    'Submitted QA1',
+    'Submitted QA2',
+    'QA Completed',
 ];
 
 const qaOptions = [
@@ -28,35 +15,92 @@ const qaOptions = [
     'QA Completed',
 ];
 
-function Proposals() {
-    // State for proposals list
-    const [proposals, setProposals] = useState(initialProposals);
+function EditProposalModal({ proposal, onSave, onClose }) {
+    const [form, setForm] = useState({ ...proposal });
+    const handleChange = e => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+    const handleSubmit = e => {
+        e.preventDefault();
+        onSave(form);
+    };
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+            <form className="bg-white dark:bg-gray-800 p-6 rounded shadow w-96" onSubmit={handleSubmit}>
+                <h3 className="text-lg font-bold mb-4">Edit Proposal</h3>
+                <input name="title" value={form.title} onChange={handleChange} className="w-full mb-2 border rounded px-2 py-1" placeholder="Title" />
+                <input name="client" value={form.client} onChange={handleChange} className="w-full mb-2 border rounded px-2 py-1" placeholder="Client" />
+                <input name="department" value={form.department} onChange={handleChange} className="w-full mb-2 border rounded px-2 py-1" placeholder="Department" />
+                <input name="createdBy" value={form.createdBy} onChange={handleChange} className="w-full mb-2 border rounded px-2 py-1" placeholder="Created By" />
+                <input name="qaStatus" value={form.qaStatus} onChange={handleChange} className="w-full mb-2 border rounded px-2 py-1" placeholder="QA Status" />
+                <div className="flex justify-end space-x-2 mt-4">
+                    <button type="button" className="px-3 py-1 bg-gray-400 text-white rounded" onClick={onClose}>Cancel</button>
+                    <button type="submit" className="px-3 py-1 bg-blue-600 text-white rounded">Save</button>
+                </div>
+            </form>
+        </div>
+    );
+}
 
-    // Handle QA status change
-    const handleQAStatusChange = (id, newStatus) => {
-        setProposals((prev) =>
-            prev.map((p) =>
-                p.id === id ? { ...p, qaStatus: newStatus } : p
-            )
-        );
-        // If QA Completed, trigger API call to create project (to be implemented)
-        if (newStatus === 'QA Completed') {
-            // TODO: Call backend API to create project from proposal
-            alert('Project will be created from this proposal (API call placeholder)');
+function Proposals() {
+    const [proposals, setProposals] = useState([]);
+    const [editProposal, setEditProposal] = useState(null);
+    const apiUrl = import.meta.env.VITE_API_URL || '';
+    useEffect(() => {
+        const fetchProposals = async () => {
+            try {
+                const response = await axios.get(`${apiUrl}/api/proposals`);
+                setProposals(response.data);
+            } catch {
+                setProposals([]);
+            }
+        };
+        fetchProposals();
+    }, []);
+
+    const handleQAStatusChange = async (id, newStatus) => {
+        try {
+            await axios.patch(`${apiUrl}/api/proposals/${id}/qa`, { qaStatus: newStatus });
+            setProposals(proposals.map(p => p.id === id ? { ...p, qaStatus: newStatus } : p));
+        } catch {
+            alert('Failed to update QA status');
         }
     };
 
-    // Handle create proposal (manual, for now just adds dummy)
-    const handleCreateProposal = () => {
+    const handleCreateProposal = async () => {
         const newProposal = {
-            id: proposals.length + 1,
             title: 'New Proposal',
             department: 'TBD',
             client: 'TBD',
             createdBy: 'You',
             qaStatus: 'Submitted QA1',
         };
-        setProposals([newProposal, ...proposals]);
+        try {
+            const response = await axios.post(`${apiUrl}/api/proposals`, newProposal);
+            setProposals([response.data, ...proposals]);
+        } catch {
+            alert('Failed to create proposal');
+        }
+    };
+
+    const handleEdit = (proposal) => setEditProposal(proposal);
+    const handleSaveEdit = async (updated) => {
+        try {
+            await axios.put(`${apiUrl}/api/proposals/${updated.id}`, updated);
+            setProposals(proposals.map(p => p.id === updated.id ? { ...p, ...updated } : p));
+            setEditProposal(null);
+        } catch {
+            alert('Failed to update proposal');
+        }
+    };
+    const handleDelete = async (id) => {
+        if (!window.confirm('Delete this proposal?')) return;
+        try {
+            await axios.delete(`${apiUrl}/api/proposals/${id}`);
+            setProposals(proposals.filter(p => p.id !== id));
+        } catch {
+            alert('Failed to delete proposal');
+        }
     };
 
     return (
@@ -89,9 +133,14 @@ function Proposals() {
                                 ))}
                             </select>
                         </div>
+                        <div className="flex space-x-2 mt-2">
+                            <button className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600" onClick={() => handleEdit(proposal)}>Edit</button>
+                            <button className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700" onClick={() => handleDelete(proposal.id)}>Delete</button>
+                        </div>
                     </div>
                 ))}
             </div>
+            {editProposal && <EditProposalModal proposal={editProposal} onSave={handleSaveEdit} onClose={() => setEditProposal(null)} />}
         </div>
     );
 }

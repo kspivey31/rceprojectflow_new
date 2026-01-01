@@ -1,6 +1,7 @@
 // ProjectDetails.jsx: Dashboard for a single project with tabbed panels
 // Impact: Implements the Project Details page with tabs for Overview, Tasks, Billing, etc.
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const tabs = [
     'Overview',
@@ -12,27 +13,74 @@ const tabs = [
     'Documents',
 ];
 
-function ProjectDetails() {
     // State for active tab
     const [activeTab, setActiveTab] = useState('Overview');
+    const [editMode, setEditMode] = useState(false);
+    const [project, setProject] = useState({
+        id: 1,
+        title: 'Project Title',
+        department: 'Structural',
+        client: 'Client Name',
+        status: 'Active',
+    });
+    const [form, setForm] = useState({ ...project });
+    const apiUrl = import.meta.env.VITE_API_URL || '';
+
+    const handleEdit = () => {
+        setForm({ ...project });
+        setEditMode(true);
+    };
+    const handleSave = async () => {
+        try {
+            await axios.put(`${apiUrl}/api/projects/${project.id}`, form);
+            setProject({ ...project, ...form });
+            setEditMode(false);
+        } catch {
+            alert('Failed to update project');
+        }
+    };
+    const handleDelete = async () => {
+        if (!window.confirm('Delete this project?')) return;
+        try {
+            await axios.delete(`${apiUrl}/api/projects/${project.id}`);
+            alert('Project deleted');
+        } catch {
+            alert('Failed to delete project');
+        }
+    };
 
     // Placeholder panel content for each tab
     const renderPanel = () => {
         switch (activeTab) {
             case 'Overview':
-                return <div>Project overview content goes here.</div>;
-            case 'Tasks':
-                return <div>Project tasks content goes here.</div>;
-            case 'Billing Summary':
-                return <div>Billing summary content goes here.</div>;
-            case 'Submittals':
-                return <div>Submittals content goes here.</div>;
-            case 'Deliverables':
-                return <div>Deliverables content goes here.</div>;
-            case 'Messaging':
-                return <div>Messaging panel content goes here.</div>;
-            case 'Documents':
-                return <div>Documents content goes here.</div>;
+                return (
+                    <div>
+                        {editMode ? (
+                            <div className="space-y-2">
+                                <input className="border rounded px-2 py-1 w-full" name="title" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+                                <input className="border rounded px-2 py-1 w-full" name="client" value={form.client} onChange={e => setForm({ ...form, client: e.target.value })} />
+                                <input className="border rounded px-2 py-1 w-full" name="department" value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} />
+                                <input className="border rounded px-2 py-1 w-full" name="status" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} />
+                                <div className="flex space-x-2 mt-2">
+                                    <button className="bg-blue-600 text-white px-3 py-1 rounded" onClick={handleSave}>Save</button>
+                                    <button className="bg-gray-400 text-white px-3 py-1 rounded" onClick={() => setEditMode(false)}>Cancel</button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div>
+                                <div className="font-semibold text-lg">{project.title}</div>
+                                <div className="text-sm text-gray-500">Client: {project.client}</div>
+                                <div className="text-sm text-gray-500">Department: {project.department}</div>
+                                <div className="text-sm text-gray-500">Status: {project.status}</div>
+                                <div className="flex space-x-2 mt-2">
+                                    <button className="bg-yellow-500 text-white px-3 py-1 rounded" onClick={handleEdit}>Edit</button>
+                                    <button className="bg-red-600 text-white px-3 py-1 rounded" onClick={handleDelete}>Delete</button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            // ...existing code...
             default:
                 return null;
         }
