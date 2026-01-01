@@ -43,7 +43,6 @@ function App() {
             <NavLink to="/messaging" className={({ isActive }) => `block py-2 px-3 rounded hover:bg-gray-200 dark:hover:bg-gray-700 ${isActive ? 'bg-gray-200 dark:bg-gray-700 font-bold' : ''}`}>Messaging</NavLink>
             <NavLink to="/gantt" className={({ isActive }) => `block py-2 px-3 rounded hover:bg-gray-200 dark:hover:bg-gray-700 ${isActive ? 'bg-gray-200 dark:bg-gray-700 font-bold' : ''}`}>Gantt</NavLink>
             <NavLink to="/project-summary-agent" className={({ isActive }) => `block py-2 px-3 rounded hover:bg-gray-200 dark:hover:bg-gray-700 ${isActive ? 'bg-gray-200 dark:bg-gray-700 font-bold' : ''}`}>Project Summary Agent</NavLink>
-            <Route path="/project-summary-agent" element={<ProjectSummaryAgent />} />
             {/* Add more links for Project Summary Agent as you build them */}
           </nav>
         </aside>
@@ -69,6 +68,7 @@ function App() {
               <Route path="/messaging" element={<Messaging />} />
               <Route path="/gantt" element={<Gantt />} />
               {/* Add more routes for Project Summary Agent as you build it */}
+              <Route path="/project-summary-agent" element={<ProjectSummaryAgent />} />
             </Routes>
           </main>
         </div>
