@@ -13,7 +13,8 @@ const tabs = [
     'Documents',
 ];
 
-    // State for active tab
+
+function ProjectDetails() {
     const [activeTab, setActiveTab] = useState('Overview');
     const [editMode, setEditMode] = useState(false);
     const [project, setProject] = useState({
@@ -49,7 +50,6 @@ const tabs = [
         }
     };
 
-    // Placeholder panel content for each tab
     const renderPanel = () => {
         switch (activeTab) {
             case 'Overview':
