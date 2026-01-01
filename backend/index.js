@@ -11,10 +11,8 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
-// Enable CORS for frontend-backend communication
-app.use(cors({
-    origin: 'https://rceprojectflownewfe-production.up.railway.app'
-}));
+// Enable CORS for frontend-backend communication (temporarily allow all origins for debugging)
+app.use(cors());
 
 // PostgreSQL connection setup
 // Impact: This connects your backend to your AWS RDS PostgreSQL database
