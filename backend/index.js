@@ -1,15 +1,3 @@
-// --- Projects API Endpoint ---
-// GET all projects
-// Impact: Returns a list of all projects from the database
-app.get('/api/projects', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT * FROM projects ORDER BY id DESC');
-        res.json(result.rows);
-    } catch (err) {
-        console.error('Error fetching projects:', err);
-        res.status(500).json({ error: 'Failed to fetch projects' });
-    }
-});
 // Entry point for the backend Express server
 // This file will set up the Express app and connect to PostgreSQL
 // Impact: This is the main file that starts your backend server
@@ -24,7 +12,9 @@ const PORT = process.env.PORT || 5000;
 // Middleware to parse JSON bodies
 app.use(express.json());
 // Enable CORS for frontend-backend communication
-app.use(cors());
+app.use(cors({
+    origin: 'https://rceprojectflownewfe-production.up.railway.app'
+}));
 
 // PostgreSQL connection setup
 // Impact: This connects your backend to your AWS RDS PostgreSQL database
@@ -35,6 +25,19 @@ const pool = new pg.Pool({
     database: process.env.PGDATABASE, // Set in Railway as PGDATABASE
     password: process.env.PGPASSWORD, // Set in Railway as PGPASSWORD
     port: process.env.PGPORT,      // Set in Railway as PGPORT (usually 5432)
+});
+
+// --- Projects API Endpoint ---
+// GET all projects
+// Impact: Returns a list of all projects from the database
+app.get('/api/projects', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM projects ORDER BY id DESC');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching projects:', err);
+        res.status(500).json({ error: 'Failed to fetch projects' });
+    }
 });
 
 
