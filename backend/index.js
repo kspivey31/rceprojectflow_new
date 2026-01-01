@@ -1,3 +1,15 @@
+// --- Projects API Endpoint ---
+// GET all projects
+// Impact: Returns a list of all projects from the database
+app.get('/api/projects', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM projects ORDER BY id DESC');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching projects:', err);
+        res.status(500).json({ error: 'Failed to fetch projects' });
+    }
+});
 // Entry point for the backend Express server
 // This file will set up the Express app and connect to PostgreSQL
 // Impact: This is the main file that starts your backend server
