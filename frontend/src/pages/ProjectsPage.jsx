@@ -18,6 +18,90 @@ function SummaryCard({ icon, label, value, color }) {
     );
 }
 
+// --- FilterBar Component ---
+function FilterBar({
+    searchTerm,
+    setSearchTerm,
+    projectManagers,
+    selectedProjectManager,
+    setSelectedProjectManager,
+    teamMembers,
+    selectedTeamMember,
+    setSelectedTeamMember,
+    departments,
+    selectedDepartment,
+    setSelectedDepartment,
+    selectedStatus,
+    setSelectedStatus,
+    viewMode,
+    setViewMode
+}) {
+    return (
+        <div className="flex flex-col md:flex-row md:items-end gap-4 mt-8 mb-6">
+            <input
+                type="text"
+                className="border rounded-lg px-3 py-2 w-full md:w-64"
+                placeholder="Search projects..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+            />
+            <select
+                className="border rounded-lg px-3 py-2"
+                value={selectedProjectManager}
+                onChange={e => setSelectedProjectManager(e.target.value)}
+            >
+                <option>All Project Managers</option>
+                {projectManagers.map(pm => (
+                    <option key={pm} value={pm}>{pm}</option>
+                ))}
+            </select>
+            <select
+                className="border rounded-lg px-3 py-2"
+                value={selectedTeamMember}
+                onChange={e => setSelectedTeamMember(e.target.value)}
+            >
+                <option>All Team Members</option>
+                {teamMembers.map(tm => (
+                    <option key={tm} value={tm}>{tm}</option>
+                ))}
+            </select>
+            <select
+                className="border rounded-lg px-3 py-2"
+                value={selectedDepartment}
+                onChange={e => setSelectedDepartment(e.target.value)}
+            >
+                <option>All Departments</option>
+                {departments.map(dep => (
+                    <option key={dep} value={dep}>{dep}</option>
+                ))}
+            </select>
+            <select
+                className="border rounded-lg px-3 py-2"
+                value={selectedStatus}
+                onChange={e => setSelectedStatus(e.target.value)}
+            >
+                <option>All Status</option>
+                <option>Planning</option>
+                <option>In Progress</option>
+                <option>On Hold</option>
+                <option>Completed</option>
+            </select>
+            <div className="flex gap-2">
+                <button
+                    className={`px-3 py-2 rounded-lg font-semibold ${viewMode === 'grid' ? 'bg-indigo-500 text-white' : 'bg-white border'}`}
+                    onClick={() => setViewMode('grid')}
+                    type="button"
+                >Grid</button>
+                <button
+                    className={`px-3 py-2 rounded-lg font-semibold ${viewMode === 'list' ? 'bg-indigo-500 text-white' : 'bg-white border'}`}
+                    onClick={() => setViewMode('list')}
+                    type="button"
+                >List</button>
+            </div>
+        </div>
+    );
+}
+
 // --- Child Components ---
 // ...[All child components from the previous code block: SummaryCard, StatusPill, PriorityPill, DepartmentPill, ProgressBar, ProjectCard, ProjectsGrid, ProjectsList, FilterBar]...
 // For brevity, see previous code block for full definitions.
