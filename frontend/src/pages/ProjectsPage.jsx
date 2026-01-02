@@ -1,0 +1,200 @@
+import React, { useEffect, useState, useMemo } from "react";
+import axios from "axios";
+import NewProjectModal from "../components/NewProjectModal";
+
+// --- Child Components ---
+// ...[All child components from the previous code block: SummaryCard, StatusPill, PriorityPill, DepartmentPill, ProgressBar, ProjectCard, ProjectsGrid, ProjectsList, FilterBar]...
+// For brevity, see previous code block for full definitions.
+
+// --- Main ProjectsPage Component ---
+const ProjectsPage = () => {
+    // --- State ---
+    const [projects, setProjects] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedProjectManager, setSelectedProjectManager] = useState("All Project Managers");
+    const [selectedTeamMember, setSelectedTeamMember] = useState("All Team Members");
+    const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
+    const [selectedStatus, setSelectedStatus] = useState("All Status");
+    const [viewMode, setViewMode] = useState("grid");
+    const [isNewProjectOpen, setIsNewProjectOpen] = useState(false);
+
+    // --- Fetch Projects ---
+    useEffect(() => {
+        axios.get("/api/projects")
+            .then(res => setProjects(res.data))
+            .catch(() => setProjects([]));
+    }, []);
+
+    // --- Debounced Search ---
+    const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
+    useEffect(() => {
+        const handler = setTimeout(() => setDebouncedSearch(searchTerm), 300);
+        return () => clearTimeout(handler);
+    }, [searchTerm]);
+
+    // --- Filtered Projects ---
+    const filteredProjects = useMemo(() => {
+        let filtered = [...projects];
+        // Search
+        if (debouncedSearch) {
+            const term = debouncedSearch.toLowerCase();
+            filtered = filtered.filter(
+                (p) =>
+                    String(p.projectNumber).toLowerCase().includes(term) ||
+                    (p.name && p.name.toLowerCase().includes(term)) ||
+                    (p.pmEmail && p.pmEmail.toLowerCase().includes(term)) ||
+                    (p.description && p.description.toLowerCase().includes(term))
+            );
+        }
+        // Project Manager
+        if (selectedProjectManager !== "All Project Managers") {
+            filtered = filtered.filter((p) => p.pmEmail === selectedProjectManager);
+        }
+        // Team Member
+        if (selectedTeamMember !== "All Team Members") {
+            filtered = filtered.filter(
+                (p) => Array.isArray(p.teamMembers) && p.teamMembers.includes(selectedTeamMember)
+            );
+        }
+        // Department
+        if (selectedDepartment !== "All Departments") {
+            filtered = filtered.filter((p) => p.department === selectedDepartment);
+        }
+        // Status
+        if (selectedStatus !== "All Status") {
+            filtered = filtered.filter((p) => p.status === selectedStatus);
+        }
+        return filtered;
+    }, [
+        projects,
+        debouncedSearch,
+        selectedProjectManager,
+        selectedTeamMember,
+        selectedDepartment,
+        selectedStatus,
+    ]);
+
+    // --- Dropdown Options ---
+    const projectManagers = useMemo(
+        () => Array.from(new Set(projects.map((p) => p.pmEmail))).filter(Boolean),
+        [projects]
+    );
+    const teamMembers = useMemo(
+        () =>
+            Array.from(
+                new Set(
+                    projects.flatMap((p) => Array.isArray(p.teamMembers) ? p.teamMembers : [])
+                )
+            ).filter(Boolean),
+        [projects]
+    );
+    const departments = useMemo(
+        () => Array.from(new Set(projects.map((p) => p.department))).filter(Boolean),
+        [projects]
+    );
+
+    // --- Summary Stats ---
+    const totalProjects = filteredProjects.length;
+    const inProgress = filteredProjects.filter((p) => p.status === "In Progress").length;
+    const completed = filteredProjects.filter((p) => p.status === "Completed").length;
+
+    // --- Actions ---
+    const handleCreateProject = (createdProject) => {
+        setProjects((prev) => [createdProject, ...prev]);
+        setIsNewProjectOpen(false);
+    };
+
+    const handleExportUsers = () => {
+        console.log("Export Users clicked");
+    };
+
+    const handleContext = (project) => {
+        alert(`Open context for ${project.name}`);
+    };
+
+    // --- Render ---
+    return (
+        <div className="bg-slate-50 min-h-screen p-6">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h1 className="text-4xl font-extrabold text-slate-900">Projects</h1>
+                    <div className="text-slate-500 mt-1">
+                        Manage and track all your projects in one place
+                    </div>
+                </div>
+                <div className="flex gap-2 mt-2 md:mt-0">
+                    <button
+                        className="bg-white border border-slate-200 text-slate-700 font-semibold rounded-lg px-4 py-2 shadow-sm hover:bg-slate-100 transition"
+                        onClick={handleExportUsers}
+                    >
+                        Export Users
+                    </button>
+                    <button
+                        className="bg-indigo-500 text-white font-semibold rounded-lg px-4 py-2 shadow-sm hover:bg-indigo-600 transition"
+                        onClick={() => setIsNewProjectOpen(true)}
+                    >
+                        + New Project
+                    </button>
+                </div>
+            </div>
+
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8">
+                <SummaryCard
+                    icon={<span className="material-icons text-3xl text-indigo-500">folder</span>}
+                    label="Total Projects"
+                    value={totalProjects}
+                    color="bg-indigo-500"
+                />
+                <SummaryCard
+                    icon={<span className="material-icons text-3xl text-yellow-500">hourglass_empty</span>}
+                    label="In Progress"
+                    value={inProgress}
+                    color="bg-yellow-500"
+                />
+                <SummaryCard
+                    icon={<span className="material-icons text-3xl text-green-500">check_circle</span>}
+                    label="Completed"
+                    value={completed}
+                    color="bg-green-500"
+                />
+            </div>
+
+            {/* Filters/Search */}
+            <FilterBar
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                projectManagers={projectManagers}
+                selectedProjectManager={selectedProjectManager}
+                setSelectedProjectManager={setSelectedProjectManager}
+                teamMembers={teamMembers}
+                selectedTeamMember={selectedTeamMember}
+                setSelectedTeamMember={setSelectedTeamMember}
+                departments={departments}
+                selectedDepartment={selectedDepartment}
+                setSelectedDepartment={setSelectedDepartment}
+                selectedStatus={selectedStatus}
+                setSelectedStatus={setSelectedStatus}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+            />
+
+            {/* Projects Grid/List */}
+            {viewMode === "grid" ? (
+                <ProjectsGrid projects={filteredProjects} onContext={handleContext} />
+            ) : (
+                <ProjectsList projects={filteredProjects} onContext={handleContext} />
+            )}
+
+            {/* New Project Modal */}
+            <NewProjectModal
+                isOpen={isNewProjectOpen}
+                onClose={() => setIsNewProjectOpen(false)}
+                onCreate={handleCreateProject}
+            />
+        </div>
+    );
+};
+
+export default ProjectsPage;

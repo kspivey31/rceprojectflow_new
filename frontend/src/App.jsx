@@ -13,6 +13,7 @@ import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-do
 import Proposals from './pages/Proposals.jsx';
 import ProposalBuilder from './pages/ProposalBuilder.jsx';
 import Projects from './pages/Projects.jsx';
+import ProjectsPage from './pages/ProjectsPage.jsx';
 
 // Placeholder components for each page, with comments for beginners
 function Home() {
@@ -59,7 +60,7 @@ function App() {
           <main className="flex-1 p-6 overflow-y-auto">
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/projects" element={<Projects />} />
+              <Route path="/projects" element={<ProjectsPage />} />
               <Route path="/projects/:id" element={<ProjectDetails />} />
               <Route path="/team-capacity" element={<TeamCapacity />} />
               <Route path="/proposals" element={<Proposals />} />
