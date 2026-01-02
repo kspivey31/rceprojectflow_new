@@ -1,6 +1,22 @@
+
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import NewProjectModal from "../components/NewProjectModal";
+
+// --- SummaryCard Component ---
+function SummaryCard({ icon, label, value, color }) {
+    return (
+        <div className={`flex items-center p-4 rounded-lg shadow bg-white`}>
+            <div className={`w-12 h-12 flex items-center justify-center rounded-full ${color} bg-opacity-20 mr-4`}>
+                {icon}
+            </div>
+            <div>
+                <div className="text-2xl font-bold">{value}</div>
+                <div className="text-gray-500">{label}</div>
+            </div>
+        </div>
+    );
+}
 
 // --- Child Components ---
 // ...[All child components from the previous code block: SummaryCard, StatusPill, PriorityPill, DepartmentPill, ProgressBar, ProjectCard, ProjectsGrid, ProjectsList, FilterBar]...
