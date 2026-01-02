@@ -1,42 +1,48 @@
 
 
+
 // --- Imports ---
 // Import Express for server, pg for PostgreSQL, and cors for cross-origin requests
-import express from 'express';
-import pg from 'pg';
-import cors from 'cors';
+import express from 'express'; // Web framework for Node.js
+import pg from 'pg';            // PostgreSQL client
+import cors from 'cors';        // Middleware for enabling CORS
+
 
 
 // --- App Initialization ---
-// Create Express app and set the port (default 5000)
+// Create Express app instance and set the port (default 5000)
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 
+
 // --- Middleware ---
-// Enable JSON body parsing and CORS for all routes
+// Enable JSON body parsing for incoming requests and allow CORS for all origins
 app.use(express.json());
 app.use(cors());
+
 
 
 // --- PostgreSQL Connection ---
 // Create a connection pool to PostgreSQL using environment variables
 // SSL is enabled for secure cloud DB connections (e.g., AWS RDS)
 const pool = new pg.Pool({
-    user: process.env.PGUSER,
-    host: process.env.PGHOST,
-    database: process.env.PGDATABASE,
-    password: process.env.PGPASSWORD,
-    port: process.env.PGPORT,
-    ssl: { rejectUnauthorized: false }
+    user: process.env.PGUSER,         // DB username
+    host: process.env.PGHOST,         // DB host
+    database: process.env.PGDATABASE, // DB name
+    password: process.env.PGPASSWORD, // DB password
+    port: process.env.PGPORT,         // DB port
+    ssl: { rejectUnauthorized: false } // Accept self-signed certs for cloud DBs
 });
+
 
 
 // --- API Endpoints ---
 
 // --- Projects Endpoints ---
 
-// Get all projects (ordered by newest first)
+// GET /api/projects
+// Fetch all projects from the database, ordered by newest first
 app.get('/api/projects', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM projects ORDER BY id DESC');
@@ -47,8 +53,9 @@ app.get('/api/projects', async (req, res) => {
     }
 });
 
-// Create a new project
-// Expects: projectNumber, title, department, client, phases, pricing, tasks, status in body
+// POST /api/projects
+// Create a new project with the provided data in the request body
+// Expects: projectNumber, title, department, client, phases, pricing, tasks, status
 app.post('/api/projects', async (req, res) => {
     const { projectNumber, title, department, client, phases, pricing, tasks, status } = req.body;
     try {
@@ -63,8 +70,9 @@ app.post('/api/projects', async (req, res) => {
     }
 });
 
-// Update an existing project by ID
-// Expects: projectNumber, title, department, client, phases, pricing, tasks, status in body
+// PUT /api/projects/:id
+// Update an existing project by ID with the provided data
+// Expects: projectNumber, title, department, client, phases, pricing, tasks, status
 app.put('/api/projects/:id', async (req, res) => {
     const { id } = req.params;
     const { projectNumber, title, department, client, phases, pricing, tasks, status } = req.body;
@@ -76,11 +84,12 @@ app.put('/api/projects/:id', async (req, res) => {
         res.json(result.rows[0]);
     } catch (err) {
         console.error('Error updating project:', err);
-        res.status(500).json({ error: 'Failed to update project' });
+        res.status(500).json({ error: 'An error occurred while updating the project' });
     }
 });
 
-// Delete a project by ID
+// DELETE /api/projects/:id
+// Delete a project by its ID
 app.delete('/api/projects/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -93,9 +102,11 @@ app.delete('/api/projects/:id', async (req, res) => {
 });
 
 
+
 // --- Proposals Endpoints ---
 
-// Get all proposals (ordered by newest first)
+// GET /api/proposals
+// Fetch all proposals from the database, ordered by newest first
 app.get('/api/proposals', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM proposals ORDER BY id DESC');
@@ -106,8 +117,9 @@ app.get('/api/proposals', async (req, res) => {
     }
 });
 
-// Create a new proposal
-// Expects: title, department, client, createdBy, qaStatus, phases, pricing, tasks, comments in body
+// POST /api/proposals
+// Create a new proposal with the provided data in the request body
+// Expects: title, department, client, createdBy, qaStatus, phases, pricing, tasks, comments
 app.post('/api/proposals', async (req, res) => {
     const { title, department, client, createdBy, qaStatus, phases, pricing, tasks, comments } = req.body;
     try {
@@ -122,8 +134,9 @@ app.post('/api/proposals', async (req, res) => {
     }
 });
 
-// Update an existing proposal by ID
-// Expects: title, department, client, createdBy, qaStatus, phases, pricing, tasks, comments in body
+// PUT /api/proposals/:id
+// Update an existing proposal by ID with the provided data
+// Expects: title, department, client, createdBy, qaStatus, phases, pricing, tasks, comments
 app.put('/api/proposals/:id', async (req, res) => {
     const { id } = req.params;
     const { title, department, client, createdBy, qaStatus, phases, pricing, tasks, comments } = req.body;
@@ -135,11 +148,12 @@ app.put('/api/proposals/:id', async (req, res) => {
         res.json(result.rows[0]);
     } catch (err) {
         console.error('Error updating proposal:', err);
-        res.status(500).json({ error: 'Failed to update proposal' });
+        res.status(500).json({ error: 'An error occurred while updating the proposal' });
     }
 });
 
-// Delete a proposal by ID
+// DELETE /api/proposals/:id
+// Delete a proposal by its ID
 app.delete('/api/proposals/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -151,12 +165,13 @@ app.delete('/api/proposals/:id', async (req, res) => {
     }
 });
 
+// PATCH /api/proposals/:id/qa
 // Update QA status for a proposal; if completed, create a new project from proposal
 app.patch('/api/proposals/:id/qa', async (req, res) => {
     const { id } = req.params;
     const { qaStatus } = req.body;
     try {
-        // Update QA status
+        // Update QA status for the proposal
         await pool.query('UPDATE proposals SET qa_status = $1 WHERE id = $2', [qaStatus, id]);
         // If QA is completed, create a new project from this proposal
         if (qaStatus === 'QA Completed') {
@@ -177,13 +192,16 @@ app.patch('/api/proposals/:id/qa', async (req, res) => {
 });
 
 
+
 // --- Health and Utility Endpoints ---
 
+// GET /health
 // Health check endpoint for uptime monitoring
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', message: 'Backend server is healthy' });
 });
 
+// GET /
 // Root test route for quick server check
 app.get('/', (req, res) => {
     res.send('Backend server is running!');
@@ -202,6 +220,7 @@ pool.connect()
     });
 
 // --- Start Express Server ---
+// Start the Express server and listen on the specified port
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
