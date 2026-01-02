@@ -253,8 +253,12 @@ const ProjectsPage = () => {
 
     // --- Summary Stats ---
     const totalProjects = filteredProjects.length;
-    const inProgress = filteredProjects.filter((p) => p.status === "In Progress").length;
-    const completed = filteredProjects.filter((p) => p.status === "Completed").length;
+    const inProgress = Array.isArray(filteredProjects)
+        ? filteredProjects.filter((p) => p && p.status === "In Progress").length
+        : 0;
+    const completed = Array.isArray(filteredProjects)
+        ? filteredProjects.filter((p) => p && p.status === "Completed").length
+        : 0;
 
     // --- Actions ---
     const handleCreateProject = (createdProject) => {
