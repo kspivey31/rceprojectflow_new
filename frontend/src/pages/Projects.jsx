@@ -29,10 +29,47 @@ function EditProjectModal({ project, onSave, onClose }) {
     );
 }
 
+function CreateProjectModal({ onSave, onClose }) {
+    const [form, setForm] = useState({
+        projectNumber: '',
+        title: '',
+        department: '',
+        client: '',
+        phases: [],
+        pricing: {},
+        tasks: [],
+        status: 'Active',
+    });
+    const handleChange = e => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+    const handleSubmit = e => {
+        e.preventDefault();
+        onSave(form);
+    };
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+            <form className="bg-white dark:bg-gray-800 p-6 rounded shadow w-96" onSubmit={handleSubmit}>
+                <h3 className="text-lg font-bold mb-4">Create Project</h3>
+                <input name="projectNumber" value={form.projectNumber} onChange={handleChange} className="w-full mb-2 border rounded px-2 py-1" placeholder="Project Number" required />
+                <input name="title" value={form.title} onChange={handleChange} className="w-full mb-2 border rounded px-2 py-1" placeholder="Title" required />
+                <input name="client" value={form.client} onChange={handleChange} className="w-full mb-2 border rounded px-2 py-1" placeholder="Client" required />
+                <input name="department" value={form.department} onChange={handleChange} className="w-full mb-2 border rounded px-2 py-1" placeholder="Department" required />
+                <input name="status" value={form.status} onChange={handleChange} className="w-full mb-2 border rounded px-2 py-1" placeholder="Status" />
+                <div className="flex justify-end space-x-2 mt-4">
+                    <button type="button" className="px-3 py-1 bg-gray-400 text-white rounded" onClick={onClose}>Cancel</button>
+                    <button type="submit" className="px-3 py-1 bg-green-600 text-white rounded">Create</button>
+                </div>
+            </form>
+        </div>
+    );
+}
+
 function Projects() {
     // State for projects and filters
     const [projects, setProjects] = useState([]);
     const [editProject, setEditProject] = useState(null);
+    const [createModal, setCreateModal] = useState(false);
     const [search, setSearch] = useState('');
     const [department, setDepartment] = useState('');
     const [status, setStatus] = useState('');
@@ -87,11 +124,22 @@ function Projects() {
         }
     };
 
+    const handleCreateProject = async (newProject) => {
+        try {
+            const response = await axios.post(`${apiUrl}/api/projects`, newProject);
+            setProjects([response.data, ...projects]);
+            setCreateModal(false);
+        } catch (err) {
+            alert('Failed to create project');
+        }
+    };
+
     return (
         <div>
             {loading && <div className="text-center text-gray-500">Loading projects...</div>}
             {error && <div className="text-center text-red-500">{error}</div>}
             <div className="flex flex-col md:flex-row md:items-end md:space-x-4 mb-6">
+                <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mb-2 md:mb-0" onClick={() => setCreateModal(true)}>+ Create Project</button>
                 {/* ...existing code... */}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -113,6 +161,7 @@ function Projects() {
                 {filtered.length === 0 && <div className="col-span-full text-center text-gray-500">No projects found.</div>}
             </div>
             {editProject && <EditProjectModal project={editProject} onSave={handleSaveEdit} onClose={() => setEditProject(null)} />}
+            {createModal && <CreateProjectModal onSave={handleCreateProject} onClose={() => setCreateModal(false)} />}
         </div>
     );
 }
