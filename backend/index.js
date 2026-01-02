@@ -1,18 +1,27 @@
 
+
 // --- Imports ---
+// Import Express for server, pg for PostgreSQL, and cors for cross-origin requests
 import express from 'express';
 import pg from 'pg';
 import cors from 'cors';
 
+
 // --- App Initialization ---
+// Create Express app and set the port (default 5000)
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+
 // --- Middleware ---
+// Enable JSON body parsing and CORS for all routes
 app.use(express.json());
 app.use(cors());
 
+
 // --- PostgreSQL Connection ---
+// Create a connection pool to PostgreSQL using environment variables
+// SSL is enabled for secure cloud DB connections (e.g., AWS RDS)
 const pool = new pg.Pool({
     user: process.env.PGUSER,
     host: process.env.PGHOST,
@@ -22,8 +31,12 @@ const pool = new pg.Pool({
     ssl: { rejectUnauthorized: false }
 });
 
+
 // --- API Endpoints ---
-// Projects
+
+// --- Projects Endpoints ---
+
+// Get all projects (ordered by newest first)
 app.get('/api/projects', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM projects ORDER BY id DESC');
@@ -34,6 +47,8 @@ app.get('/api/projects', async (req, res) => {
     }
 });
 
+// Create a new project
+// Expects: projectNumber, title, department, client, phases, pricing, tasks, status in body
 app.post('/api/projects', async (req, res) => {
     const { projectNumber, title, department, client, phases, pricing, tasks, status } = req.body;
     try {
@@ -48,6 +63,8 @@ app.post('/api/projects', async (req, res) => {
     }
 });
 
+// Update an existing project by ID
+// Expects: projectNumber, title, department, client, phases, pricing, tasks, status in body
 app.put('/api/projects/:id', async (req, res) => {
     const { id } = req.params;
     const { projectNumber, title, department, client, phases, pricing, tasks, status } = req.body;
@@ -63,6 +80,7 @@ app.put('/api/projects/:id', async (req, res) => {
     }
 });
 
+// Delete a project by ID
 app.delete('/api/projects/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -74,7 +92,10 @@ app.delete('/api/projects/:id', async (req, res) => {
     }
 });
 
-// Proposals
+
+// --- Proposals Endpoints ---
+
+// Get all proposals (ordered by newest first)
 app.get('/api/proposals', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM proposals ORDER BY id DESC');
@@ -85,6 +106,8 @@ app.get('/api/proposals', async (req, res) => {
     }
 });
 
+// Create a new proposal
+// Expects: title, department, client, createdBy, qaStatus, phases, pricing, tasks, comments in body
 app.post('/api/proposals', async (req, res) => {
     const { title, department, client, createdBy, qaStatus, phases, pricing, tasks, comments } = req.body;
     try {
@@ -99,6 +122,8 @@ app.post('/api/proposals', async (req, res) => {
     }
 });
 
+// Update an existing proposal by ID
+// Expects: title, department, client, createdBy, qaStatus, phases, pricing, tasks, comments in body
 app.put('/api/proposals/:id', async (req, res) => {
     const { id } = req.params;
     const { title, department, client, createdBy, qaStatus, phases, pricing, tasks, comments } = req.body;
@@ -114,6 +139,7 @@ app.put('/api/proposals/:id', async (req, res) => {
     }
 });
 
+// Delete a proposal by ID
 app.delete('/api/proposals/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -125,11 +151,14 @@ app.delete('/api/proposals/:id', async (req, res) => {
     }
 });
 
+// Update QA status for a proposal; if completed, create a new project from proposal
 app.patch('/api/proposals/:id/qa', async (req, res) => {
     const { id } = req.params;
     const { qaStatus } = req.body;
     try {
+        // Update QA status
         await pool.query('UPDATE proposals SET qa_status = $1 WHERE id = $2', [qaStatus, id]);
+        // If QA is completed, create a new project from this proposal
         if (qaStatus === 'QA Completed') {
             const propRes = await pool.query('SELECT * FROM proposals WHERE id = $1', [id]);
             const proposal = propRes.rows[0];
@@ -147,17 +176,21 @@ app.patch('/api/proposals/:id/qa', async (req, res) => {
     }
 });
 
-// Health check
+
+// --- Health and Utility Endpoints ---
+
+// Health check endpoint for uptime monitoring
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', message: 'Backend server is healthy' });
 });
 
-// Test route
+// Root test route for quick server check
 app.get('/', (req, res) => {
     res.send('Backend server is running!');
 });
 
-// DB connection check
+// --- Database Connection Check ---
+// On startup, verify DB connection and log status
 pool.connect()
     .then(client => {
         console.log('Connected to PostgreSQL database');
@@ -168,7 +201,7 @@ pool.connect()
         process.exit(1);
     });
 
-// Start server
+// --- Start Express Server ---
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
