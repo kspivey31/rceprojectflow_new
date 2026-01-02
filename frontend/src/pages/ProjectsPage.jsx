@@ -185,16 +185,17 @@ const ProjectsPage = () => {
 
     // --- Filtered Projects ---
     const filteredProjects = useMemo(() => {
-        let filtered = [...projects];
+        let filtered = Array.isArray(projects) ? [...projects] : [];
         // Search
         if (debouncedSearch) {
             const term = debouncedSearch.toLowerCase();
             filtered = filtered.filter(
                 (p) =>
-                    String(p.projectNumber).toLowerCase().includes(term) ||
-                    (p.name && p.name.toLowerCase().includes(term)) ||
-                    (p.pmEmail && p.pmEmail.toLowerCase().includes(term)) ||
-                    (p.description && p.description.toLowerCase().includes(term))
+                    (p.projectNumber && String(p.projectNumber).toLowerCase().includes(term)) ||
+                    (p.name && typeof p.name === 'string' && p.name.toLowerCase().includes(term)) ||
+                    (p.title && typeof p.title === 'string' && p.title.toLowerCase().includes(term)) ||
+                    (p.pmEmail && typeof p.pmEmail === 'string' && p.pmEmail.toLowerCase().includes(term)) ||
+                    (p.description && typeof p.description === 'string' && p.description.toLowerCase().includes(term))
             );
         }
         // Project Manager
@@ -227,20 +228,26 @@ const ProjectsPage = () => {
 
     // --- Dropdown Options ---
     const projectManagers = useMemo(
-        () => Array.from(new Set(projects.map((p) => p.pmEmail))).filter(Boolean),
+        () => Array.isArray(projects)
+            ? Array.from(new Set(projects.map((p) => p.pmEmail).filter(Boolean)))
+            : [],
         [projects]
     );
     const teamMembers = useMemo(
         () =>
-            Array.from(
-                new Set(
-                    projects.flatMap((p) => Array.isArray(p.teamMembers) ? p.teamMembers : [])
-                )
-            ).filter(Boolean),
+            Array.isArray(projects)
+                ? Array.from(
+                    new Set(
+                        projects.flatMap((p) => Array.isArray(p.teamMembers) ? p.teamMembers : [])
+                    )
+                ).filter(Boolean)
+                : [],
         [projects]
     );
     const departments = useMemo(
-        () => Array.from(new Set(projects.map((p) => p.department))).filter(Boolean),
+        () => Array.isArray(projects)
+            ? Array.from(new Set(projects.map((p) => p.department).filter(Boolean)))
+            : [],
         [projects]
     );
 
