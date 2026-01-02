@@ -8,12 +8,17 @@ function ProjectsGrid({ projects, onContext }) {
             {projects.map((project, idx) => {
                 if (!project || typeof project !== 'object') return null;
                 const key = project.id || project.projectNumber || idx;
+                // Defensive property access for all fields
+                const title = typeof project.title === 'string' ? project.title : (typeof project.name === 'string' ? project.name : 'Untitled');
+                const client = typeof project.client === 'string' ? project.client : '';
+                const department = typeof project.department === 'string' ? project.department : '';
+                const status = typeof project.status === 'string' ? project.status : '';
                 return (
                     <div key={key} className="bg-white rounded shadow p-4 flex flex-col space-y-2 w-full max-w-md mx-auto">
-                        <div className="font-semibold text-lg">{project.title || project.name || 'Untitled'}</div>
-                        <div className="text-sm text-gray-500">Client: {project.client || ''}</div>
-                        <div className="text-sm text-gray-500">Department: {project.department || ''}</div>
-                        <div className="text-sm text-gray-500">Status: {project.status || ''}</div>
+                        <div className="font-semibold text-lg">{title}</div>
+                        <div className="text-sm text-gray-500">Client: {client}</div>
+                        <div className="text-sm text-gray-500">Department: {department}</div>
+                        <div className="text-sm text-gray-500">Status: {status}</div>
                         <div className="flex flex-wrap gap-2 mt-4 justify-start">
                             <button className="bg-blue-600 text-white px-4 py-2 rounded font-semibold hover:bg-blue-700">View Details</button>
                             <button className="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700">Messaging</button>
@@ -37,13 +42,18 @@ function ProjectsList({ projects, onContext }) {
             {projects.map((project, idx) => {
                 if (!project || typeof project !== 'object') return null;
                 const key = project.id || project.projectNumber || idx;
+                // Defensive property access for all fields
+                const title = typeof project.title === 'string' ? project.title : (typeof project.name === 'string' ? project.name : 'Untitled');
+                const client = typeof project.client === 'string' ? project.client : '';
+                const department = typeof project.department === 'string' ? project.department : '';
+                const status = typeof project.status === 'string' ? project.status : '';
                 return (
                     <div key={key} className="p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                         <div>
-                            <div className="font-semibold text-lg">{project.title || project.name || 'Untitled'}</div>
-                            <div className="text-sm text-gray-500">Client: {project.client || ''}</div>
-                            <div className="text-sm text-gray-500">Department: {project.department || ''}</div>
-                            <div className="text-sm text-gray-500">Status: {project.status || ''}</div>
+                            <div className="font-semibold text-lg">{title}</div>
+                            <div className="text-sm text-gray-500">Client: {client}</div>
+                            <div className="text-sm text-gray-500">Department: {department}</div>
+                            <div className="text-sm text-gray-500">Status: {status}</div>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
                             <button className="bg-blue-600 text-white px-4 py-2 rounded font-semibold hover:bg-blue-700">View Details</button>
