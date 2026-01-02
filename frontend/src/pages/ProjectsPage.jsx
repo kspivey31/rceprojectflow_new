@@ -71,15 +71,14 @@ function ProjectsList({ projects, onContext }) {
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import NewProjectModal from "../components/NewProjectModal";
+import { Folder, Hourglass, CheckCircle2 } from "lucide-react";
 
 // --- SummaryCard Component ---
 function SummaryCard({ icon, label, value, color }) {
     return (
         <div className={`flex items-center p-4 rounded-lg shadow bg-white`}>
             <div className={`w-12 h-12 flex items-center justify-center rounded-full ${color} bg-opacity-20 mr-4`}>
-                <span className="material-icons text-3xl" style={{ color: color.replace('bg-', '') }}>
-                    {icon}
-                </span>
+                {icon}
             </div>
             <div>
                 <div className="text-2xl font-bold">{value}</div>
@@ -324,19 +323,19 @@ const ProjectsPage = () => {
             {/* Summary Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8">
                 <SummaryCard
-                    icon="folder"
+                    icon={<Folder className="h-6 w-6 text-indigo-600" />}
                     label="Total Projects"
                     value={totalProjects}
                     color="bg-indigo-500"
                 />
                 <SummaryCard
-                    icon="hourglass_empty"
+                    icon={<Hourglass className="h-6 w-6 text-yellow-500" />}
                     label="In Progress"
                     value={inProgress}
                     color="bg-yellow-500"
                 />
                 <SummaryCard
-                    icon="check_circle"
+                    icon={<CheckCircle2 className="h-6 w-6 text-green-500" />}
                     label="Completed"
                     value={completed}
                     color="bg-green-500"
