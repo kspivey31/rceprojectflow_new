@@ -84,7 +84,7 @@ app.put('/api/projects/:id', async (req, res) => {
         res.json(result.rows[0]);
     } catch (err) {
         console.error('Error updating project:', err);
-        res.status(500).json({ error: 'An error occurred while updating the project' });
+        res.status(500).json({ error: 'An error occurred while updating the project.' });
     }
 });
 
