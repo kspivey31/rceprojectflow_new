@@ -19,6 +19,7 @@ const pool = new pg.Pool({
     database: process.env.PGDATABASE,
     password: process.env.PGPASSWORD,
     port: process.env.PGPORT,
+    ssl: { rejectUnauthorized: false }
 });
 
 // --- API Endpoints ---
