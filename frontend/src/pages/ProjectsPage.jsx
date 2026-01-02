@@ -1,51 +1,59 @@
 // --- ProjectsGrid Component ---
 function ProjectsGrid({ projects, onContext }) {
-    if (!projects.length) {
+    if (!Array.isArray(projects) || projects.length === 0) {
         return <div className="text-center text-gray-500 mt-8">No projects found.</div>;
     }
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-            {projects.map(project => (
-                <div key={project.id || project.projectNumber} className="bg-white rounded shadow p-4 flex flex-col space-y-2 w-full max-w-md mx-auto">
-                    <div className="font-semibold text-lg">{project.title || project.name}</div>
-                    <div className="text-sm text-gray-500">Client: {project.client}</div>
-                    <div className="text-sm text-gray-500">Department: {project.department}</div>
-                    <div className="text-sm text-gray-500">Status: {project.status}</div>
-                    <div className="flex flex-wrap gap-2 mt-4 justify-start">
-                        <button className="bg-blue-600 text-white px-4 py-2 rounded font-semibold hover:bg-blue-700">View Details</button>
-                        <button className="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700">Messaging</button>
-                        <button className="bg-gray-700 text-white px-4 py-2 rounded font-semibold hover:bg-gray-800">Documents</button>
-                        <button className="bg-yellow-500 text-white px-4 py-2 rounded font-semibold hover:bg-yellow-600" onClick={() => onContext(project)}>Context</button>
+            {projects.map((project, idx) => {
+                if (!project || typeof project !== 'object') return null;
+                const key = project.id || project.projectNumber || idx;
+                return (
+                    <div key={key} className="bg-white rounded shadow p-4 flex flex-col space-y-2 w-full max-w-md mx-auto">
+                        <div className="font-semibold text-lg">{project.title || project.name || 'Untitled'}</div>
+                        <div className="text-sm text-gray-500">Client: {project.client || ''}</div>
+                        <div className="text-sm text-gray-500">Department: {project.department || ''}</div>
+                        <div className="text-sm text-gray-500">Status: {project.status || ''}</div>
+                        <div className="flex flex-wrap gap-2 mt-4 justify-start">
+                            <button className="bg-blue-600 text-white px-4 py-2 rounded font-semibold hover:bg-blue-700">View Details</button>
+                            <button className="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700">Messaging</button>
+                            <button className="bg-gray-700 text-white px-4 py-2 rounded font-semibold hover:bg-gray-800">Documents</button>
+                            <button className="bg-yellow-500 text-white px-4 py-2 rounded font-semibold hover:bg-yellow-600" onClick={() => onContext(project)}>Context</button>
+                        </div>
                     </div>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 }
 
 // --- ProjectsList Component ---
 function ProjectsList({ projects, onContext }) {
-    if (!projects.length) {
+    if (!Array.isArray(projects) || projects.length === 0) {
         return <div className="text-center text-gray-500 mt-8">No projects found.</div>;
     }
     return (
         <div className="divide-y divide-gray-200 bg-white rounded shadow mt-8">
-            {projects.map(project => (
-                <div key={project.id || project.projectNumber} className="p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                    <div>
-                        <div className="font-semibold text-lg">{project.title || project.name}</div>
-                        <div className="text-sm text-gray-500">Client: {project.client}</div>
-                        <div className="text-sm text-gray-500">Department: {project.department}</div>
-                        <div className="text-sm text-gray-500">Status: {project.status}</div>
+            {projects.map((project, idx) => {
+                if (!project || typeof project !== 'object') return null;
+                const key = project.id || project.projectNumber || idx;
+                return (
+                    <div key={key} className="p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                        <div>
+                            <div className="font-semibold text-lg">{project.title || project.name || 'Untitled'}</div>
+                            <div className="text-sm text-gray-500">Client: {project.client || ''}</div>
+                            <div className="text-sm text-gray-500">Department: {project.department || ''}</div>
+                            <div className="text-sm text-gray-500">Status: {project.status || ''}</div>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
+                            <button className="bg-blue-600 text-white px-4 py-2 rounded font-semibold hover:bg-blue-700">View Details</button>
+                            <button className="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700">Messaging</button>
+                            <button className="bg-gray-700 text-white px-4 py-2 rounded font-semibold hover:bg-gray-800">Documents</button>
+                            <button className="bg-yellow-500 text-white px-4 py-2 rounded font-semibold hover:bg-yellow-600" onClick={() => onContext(project)}>Context</button>
+                        </div>
                     </div>
-                    <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
-                        <button className="bg-blue-600 text-white px-4 py-2 rounded font-semibold hover:bg-blue-700">View Details</button>
-                        <button className="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700">Messaging</button>
-                        <button className="bg-gray-700 text-white px-4 py-2 rounded font-semibold hover:bg-gray-800">Documents</button>
-                        <button className="bg-yellow-500 text-white px-4 py-2 rounded font-semibold hover:bg-yellow-600" onClick={() => onContext(project)}>Context</button>
-                    </div>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 }
