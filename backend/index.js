@@ -1,4 +1,6 @@
 
+// --- API Health Endpoint ---
+app.get("/api/health", (req, res) => res.json({ ok: true }));
 
 
 // --- Imports ---
@@ -23,16 +25,35 @@ app.use(cors());
 
 
 
+
+// Use dotenv only in local development
+if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
+    // Dynamically import dotenv for ESM
+    import('dotenv/config');
+}
+
+console.log("ENV CHECK:", {
+    PGHOST: process.env.PGHOST,
+    PGPORT: process.env.PGPORT,
+    PGDATABASE: process.env.PGDATABASE,
+    PGUSER: process.env.PGUSER,
+    HAS_PGPASSWORD: Boolean(process.env.PGPASSWORD),
+});
+
 // --- PostgreSQL Connection ---
 // Create a connection pool to PostgreSQL using environment variables
 // SSL is enabled for secure cloud DB connections (e.g., AWS RDS)
+const isLocal =
+    ["localhost", "127.0.0.1"].includes(process.env.PGHOST) ||
+    process.env.NODE_ENV === "development";
+
 const pool = new pg.Pool({
     user: process.env.PGUSER,         // DB username
     host: process.env.PGHOST,         // DB host
     database: process.env.PGDATABASE, // DB name
     password: process.env.PGPASSWORD, // DB password
     port: process.env.PGPORT,         // DB port
-    ssl: { rejectUnauthorized: false } // Accept self-signed certs for cloud DBs
+    ...(isLocal ? {} : { ssl: { rejectUnauthorized: false } }) // Only use SSL if not local
 });
 
 
