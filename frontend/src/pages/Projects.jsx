@@ -144,17 +144,17 @@ function Projects() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filtered.map(project => (
-                    <div key={project.id} className="bg-white dark:bg-gray-800 rounded shadow p-4 flex flex-col space-y-2">
+                    <div key={project.id} className="bg-white dark:bg-gray-800 rounded shadow p-4 flex flex-col space-y-2 w-full max-w-md mx-auto">
                         <div className="font-semibold text-lg">{project.title}</div>
                         <div className="text-sm text-gray-500 dark:text-gray-300">Client: {project.client}</div>
                         <div className="text-sm text-gray-500 dark:text-gray-300">Department: {project.department}</div>
                         <div className="text-sm text-gray-500 dark:text-gray-300">Status: {project.status}</div>
-                        <div className="flex space-x-2 mt-2">
-                            <button className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">View Details</button>
-                            <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Messaging</button>
-                            <button className="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700">Documents</button>
-                            <button className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600" onClick={() => handleEdit(project)}>Edit</button>
-                            <button className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700" onClick={() => handleDelete(project.id)}>Delete</button>
+                        <div className="flex flex-wrap gap-2 mt-4 justify-start">
+                            <button className="bg-blue-600 text-white px-4 py-2 rounded font-semibold hover:bg-blue-700">View Details</button>
+                            <button className="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700">Messaging</button>
+                            <button className="bg-gray-700 text-white px-4 py-2 rounded font-semibold hover:bg-gray-800">Documents</button>
+                            <button className="bg-yellow-500 text-white px-4 py-2 rounded font-semibold hover:bg-yellow-600" onClick={() => handleEdit(project)}>Edit</button>
+                            <button className="bg-red-600 text-white px-4 py-2 rounded font-semibold hover:bg-red-700" onClick={() => handleDelete(project.id)}>Delete</button>
                         </div>
                     </div>
                 ))}
