@@ -77,7 +77,9 @@ function SummaryCard({ icon, label, value, color }) {
     return (
         <div className={`flex items-center p-4 rounded-lg shadow bg-white`}>
             <div className={`w-12 h-12 flex items-center justify-center rounded-full ${color} bg-opacity-20 mr-4`}>
-                {icon}
+                <span className="material-icons text-3xl" style={{ color: color.replace('bg-', '') }}>
+                    {icon}
+                </span>
             </div>
             <div>
                 <div className="text-2xl font-bold">{value}</div>
@@ -322,19 +324,19 @@ const ProjectsPage = () => {
             {/* Summary Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8">
                 <SummaryCard
-                    icon={<span className="material-icons text-3xl text-indigo-500">folder</span>}
+                    icon="folder"
                     label="Total Projects"
                     value={totalProjects}
                     color="bg-indigo-500"
                 />
                 <SummaryCard
-                    icon={<span className="material-icons text-3xl text-yellow-500">hourglass_empty</span>}
+                    icon="hourglass_empty"
                     label="In Progress"
                     value={inProgress}
                     color="bg-yellow-500"
                 />
                 <SummaryCard
-                    icon={<span className="material-icons text-3xl text-green-500">check_circle</span>}
+                    icon="check_circle"
                     label="Completed"
                     value={completed}
                     color="bg-green-500"
